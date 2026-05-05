@@ -1,0 +1,147 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Description: >
+  Portfolio contact form backend.
+  Deploys: API Gateway (HTTP) → Lambda → SES
+
+# ── Parameters ───────────────────────────────────────────────────────────────
+Parameters:
+  SenderEmail:
+    Type: String
+    Description: SES-verified sender email (e.g. hello@yourdomain.com)
+
+  NotifyEmail:
+    Type: String
+    Description: Email address that receives contact notifications
+
+  AllowedOrigin:
+    Type: String
+    Description: Frontend origin for CORS (e.g. https://yourdomain.com). Use * for dev.
+    Default: "*"
+
+  Stage:
+    Type: String
+    Default: prod
+    AllowedValues: [dev, prod]
+
+# ── Globals ───────────────────────────────────────────────────────────────────
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 15
+    MemorySize: 128
+    Environment:
+      Variables:
+        SES_SENDER_EMAIL: !Ref SenderEmail
+        NOTIFY_EMAIL:     !Ref NotifyEmail
+        ALLOWED_ORIGIN:   !Ref AllowedOrigin
+
+# ── Resources ─────────────────────────────────────────────────────────────────
+Resources:
+
+  # ── Lambda function ──────────────────────────────────────────────────────
+  ContactFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "portfolio-contact-${Stage}"
+      Handler: contact_handler.handler
+      CodeUri: ../backend/
+      Description: Handles contact form submissions and sends SES emails
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ContactPost:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ContactApi
+            Path: /contact
+            Method: POST
+        ContactOptions:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ContactApi
+            Path: /contact
+            Method: OPTIONS
+
+  # ── HTTP API (API Gateway v2) ─────────────────────────────────────────────
+  ContactApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Stage
+      Description: Portfolio contact form API
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref AllowedOrigin
+        AllowHeaders:
+          - Content-Type
+        AllowMethods:
+          - POST
+          - OPTIONS
+        MaxAge: 300
+
+  # ── IAM role ─────────────────────────────────────────────────────────────
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "portfolio-contact-lambda-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SESendEmail
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: ses:SendEmail
+                # Restrict to your verified sender identity in production
+                Resource: "*"
+
+  # ── S3 bucket (static frontend hosting) ──────────────────────────────────
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "portfolio-frontend-${AWS::AccountId}-${Stage}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "${FrontendBucket.Arn}/*"
+
+# ── Outputs ───────────────────────────────────────────────────────────────────
+Outputs:
+  ApiEndpoint:
+    Description: Paste this URL into frontend/index.html as API_ENDPOINT
+    Value: !Sub "https://${ContactApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/contact"
+
+  FrontendBucketName:
+    Description: Upload frontend/index.html to this S3 bucket
+    Value: !Ref FrontendBucket
+
+  FrontendWebsiteUrl:
+    Description: Public URL for the portfolio site
+    Value: !GetAtt FrontendBucket.WebsiteURL
+
+  ContactFunctionArn:
+    Description: ARN of the contact Lambda function
+    Value: !GetAtt ContactFunction.Arn

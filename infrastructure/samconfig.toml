@@ -1,0 +1,18 @@
+# SAM CLI deployment configuration
+# Run: sam deploy --guided   (first time)
+# Run: sam deploy            (subsequent deploys)
+
+version = 0.1
+
+[default.deploy.parameters]
+stack_name    = "portfolio-stack"
+region        = "us-east-1"          # change to your preferred region
+confirm_changeset = true
+capabilities  = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
+# Fill these in after the first guided deploy, or pass --parameter-overrides on the CLI
+parameter_overrides = [
+  "SenderEmail=hello@yourdomain.com",
+  "NotifyEmail=you@yourdomain.com",
+  "AllowedOrigin=*",
+  "Stage=prod"
+]

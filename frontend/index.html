@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Portfolio</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a24;
+      --border: #2e2e42;
+      --accent: #6c63ff;
+      --accent-hover: #857dff;
+      --text: #e8e8f0;
+      --muted: #8888a8;
+      --success: #4caf82;
+      --error: #e05c5c;
+      --radius: 12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(15, 15, 19, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+    .logo { font-weight: 700; font-size: 1.2rem; color: var(--accent); letter-spacing: -0.5px; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── Sections ── */
+    section { padding: 100px 2rem 60px; max-width: 860px; margin: 0 auto; }
+
+    /* ── Hero ── */
+    #hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 80px; }
+    .badge {
+      display: inline-block;
+      background: rgba(108, 99, 255, 0.15);
+      border: 1px solid rgba(108, 99, 255, 0.35);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      margin-bottom: 1.5rem;
+    }
+    h1 { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 800; line-height: 1.1; letter-spacing: -1px; margin-bottom: 1rem; }
+    h1 span { color: var(--accent); }
+    .hero-sub { font-size: 1.15rem; color: var(--muted); max-width: 520px; margin-bottom: 2.5rem; }
+    .hero-cta {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 0.85rem 2rem;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .hero-cta:hover { background: var(--accent-hover); transform: translateY(-2px); }
+
+    /* ── Section headings ── */
+    h2 { font-size: 1.9rem; font-weight: 700; margin-bottom: 0.4rem; letter-spacing: -0.5px; }
+    .section-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 2.5rem; }
+
+    /* ── Projects ── */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-3px); }
+    .card-tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+    .card h3 { font-size: 1.05rem; margin-bottom: 0.5rem; }
+    .card p { font-size: 0.875rem; color: var(--muted); }
+
+    /* ── Skills ── */
+    .skill-list { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+    .skill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    /* ── Contact form ── */
+    .form-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .field { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 1.25rem; }
+    label { font-size: 0.82rem; font-weight: 600; color: var(--muted); letter-spacing: 0.03em; text-transform: uppercase; }
+    input, textarea {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 130px; }
+    .btn-submit {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.9rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-submit:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    #form-status {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    #form-status.success { background: rgba(76, 175, 130, 0.15); border: 1px solid var(--success); color: var(--success); display: block; }
+    #form-status.error   { background: rgba(224, 92, 92, 0.15);  border: 1px solid var(--error);   color: var(--error);   display: block; }
+
+    /* ── Footer ── */
+    footer { text-align: center; padding: 2.5rem; color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--border); }
+
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      nav { padding: 1rem; }
+      .nav-links { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">YourName</div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section id="hero">
+    <span class="badge">Available for hire</span>
+    <h1>Hi, I'm <span>Your Name</span>.<br/>I build for the web.</h1>
+    <p class="hero-sub">Full-stack developer focused on building clean, fast, and reliable products — from idea to deployment on AWS.</p>
+    <a href="#contact" class="hero-cta">Get in touch</a>
+  </section>
+
+  <!-- About / Skills -->
+  <section id="about">
+    <h2>Skills</h2>
+    <p class="section-sub">Technologies I work with regularly.</p>
+    <div class="skill-list">
+      <span class="skill">Python</span>
+      <span class="skill">JavaScript</span>
+      <span class="skill">AWS Lambda</span>
+      <span class="skill">API Gateway</span>
+      <span class="skill">S3</span>
+      <span class="skill">DynamoDB</span>
+      <span class="skill">React</span>
+      <span class="skill">Node.js</span>
+      <span class="skill">Docker</span>
+      <span class="skill">Terraform</span>
+      <span class="skill">SAM</span>
+      <span class="skill">Git</span>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects">
+    <h2>Projects</h2>
+    <p class="section-sub">A few things I've built.</p>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-tag">Serverless</div>
+        <h3>Portfolio Site</h3>
+        <p>This very site — static frontend on S3 with a serverless contact form backed by Lambda and SES.</p>
+      </div>
+      <div class="card">
+        <div class="card-tag">API</div>
+        <h3>REST API</h3>
+        <p>A fully documented REST API built with FastAPI, containerised with Docker, and deployed on AWS ECS.</p>
+      </div>
+      <div class="card">
+        <div class="card-tag">Data</div>
+        <h3>ETL Pipeline</h3>
+        <p>Automated data pipeline using AWS Glue, S3, and Athena to process and query large datasets.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact">
+    <h2>Contact</h2>
+    <p class="section-sub">Have a project in mind? Drop me a message.</p>
+    <div class="form-wrapper">
+      <form id="contact-form" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Jane Smith" required />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="jane@example.com" required />
+          </div>
+        </div>
+        <div class="field">
+          <label for="subject">Subject</label>
+          <input type="text" id="subject" name="subject" placeholder="Project inquiry" required />
+        </div>
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" placeholder="Tell me about your project..." required></textarea>
+        </div>
+        <button type="submit" class="btn-submit" id="submit-btn">Send Message</button>
+        <div id="form-status"></div>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2026 YourName &mdash; Built with HTML, AWS Lambda &amp; Amazon SES
+  </footer>
+
+  <script>
+    // ── Replace this URL after you deploy with SAM ──
+    const API_ENDPOINT = 'https://YOUR_API_ID.execute-api.YOUR_REGION.amazonaws.com/prod/contact';
+
+    const form = document.getElementById('contact-form');
+    const btn  = document.getElementById('submit-btn');
+    const status = document.getElementById('form-status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.className = '';
+      status.textContent = '';
+
+      const name    = document.getElementById('name').value.trim();
+      const email   = document.getElementById('email').value.trim();
+      const subject = document.getElementById('subject').value.trim();
+      const message = document.getElementById('message').value.trim();
+
+      if (!name || !email || !subject || !message) {
+        status.textContent = 'Please fill in all fields.';
+        status.className = 'error';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
+      try {
+        const res = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, subject, message }),
+        });
+
+        if (res.ok) {
+          status.textContent = 'Message sent! I\'ll get back to you soon.';
+          status.className = 'success';
+          form.reset();
+        } else {
+          const data = await res.json().catch(() => ({}));
+          status.textContent = data.error || 'Something went wrong. Please try again.';
+          status.className = 'error';
+        }
+      } catch {
+        status.textContent = 'Network error — check your connection and try again.';
+        status.className = 'error';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+      }
+    });
+  </script>
+</body>
+</html>
